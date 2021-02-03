@@ -30,13 +30,13 @@ public struct ListyContextMenuItem: Identifiable {
             }
         }
         
-        var isButton: Bool {
+        public var isButton: Bool {
             if case .button = self {
                 return true
             }
             return false
         }
-        var isMenu: Bool {
+        public var isMenu: Bool {
             if case .menu = self {
                 return true
             }
