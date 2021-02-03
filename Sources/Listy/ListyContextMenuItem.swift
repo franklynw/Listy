@@ -15,7 +15,7 @@ public struct ListyContextMenuItem: Identifiable {
     let shouldAppear: ((String) -> Bool)
     let action: ((String) -> ())?
     
-    let itemType: MenuItemType
+    public let itemType: MenuItemType
     
     public enum MenuItemType: Equatable {
         case button
@@ -72,7 +72,7 @@ public struct ListyContextMenuItem: Identifiable {
         action = nil
     }
     
-    func button(itemId: String) -> AnyView {
+    public func button(itemId: String) -> AnyView {
         
         if shouldAppear(itemId) == true {
             
@@ -92,7 +92,7 @@ public struct ListyContextMenuItem: Identifiable {
         return AnyView(EmptyView())
     }
     
-    func menu(itemId: String) -> AnyView {
+    public func menu(itemId: String) -> AnyView {
         
         if shouldAppear(itemId) {
             
