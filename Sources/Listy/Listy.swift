@@ -7,6 +7,7 @@
 import SwiftUI
 import UniformTypeIdentifiers
 import SwiftUITrackableScrollView
+import FWCommonProtocols
 
 
 public struct Listy<DataSource: ListyDataSource>: View {
@@ -31,9 +32,9 @@ public struct Listy<DataSource: ListyDataSource>: View {
     @Binding private var titleColor: UIColor
     
     private var leftBarButtonAction: (() -> ())?
-    private var leftBarButtonImageName: String?
+    private var leftBarButtonImageName: SystemImageNaming?
     private var rightBarButtonAction: (() -> ())?
-    private var rightBarButtonImageName: String?
+    private var rightBarButtonImageName: SystemImageNaming?
     private var itemTapAction: ((String) -> ())?
     private var itemContextMenuItems: [ListyContextMenuItem] = []
     private var titleBarContextMenuItems: [ListyContextMenuItem] = []
@@ -99,7 +100,7 @@ public struct Listy<DataSource: ListyDataSource>: View {
                         Button {
                             leftBarButtonAction?()
                         } label: {
-                            Image(systemName: leftBarButtonAction == nil ? "gearshape" : leftBarButtonImageName!)
+                            Image(systemName: leftBarButtonAction == nil ? "gearshape" : leftBarButtonImageName!.systemImageName)
                                 .resizable()
                                 .frame(width: 22, height: 22)
                                 .opacity(leftBarButtonAction == nil ? 0 : 1)
@@ -122,7 +123,7 @@ public struct Listy<DataSource: ListyDataSource>: View {
                         Button {
                             rightBarButtonAction?()
                         } label: {
-                            Image(systemName: rightBarButtonAction == nil ? "gearshape" : rightBarButtonImageName!)
+                            Image(systemName: rightBarButtonAction == nil ? "gearshape" : rightBarButtonImageName!.systemImageName)
                                 .resizable()
                                 .frame(width: 22, height: 22)
                                 .opacity(rightBarButtonAction == nil ? 0 : 1)
@@ -237,7 +238,7 @@ extension Listy {
     /// - Parameters:
     ///   - imageSystemName: the systemName for the Image
     ///   - action: the action to invoke when tapping the button
-    public func leftBarItem(imageSystemName: String, action: @escaping () -> ()) -> Self {
+    public func leftBarItem(imageSystemName: SystemImageNaming, action: @escaping () -> ()) -> Self {
         var copy = self
         copy.leftBarButtonImageName = imageSystemName
         copy.leftBarButtonAction = action
@@ -248,7 +249,7 @@ extension Listy {
     /// - Parameters:
     ///   - imageSystemName: the systemName for the Image
     ///   - action: the action to invoke when tapping the button
-    public func rightBarItem(imageSystemName: String, action: @escaping () -> ()) -> Self {
+    public func rightBarItem(imageSystemName: SystemImageNaming, action: @escaping () -> ()) -> Self {
         var copy = self
         copy.rightBarButtonImageName = imageSystemName
         copy.rightBarButtonAction = action
