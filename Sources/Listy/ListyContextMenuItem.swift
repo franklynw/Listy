@@ -10,18 +10,18 @@ import SwiftUI
 public struct ListyContextMenuItem: Identifiable {
     
     public let id: String
+    
     let title: String
     let iconName: String?
     let shouldAppear: ((String) -> Bool)
     let action: ((String) -> ())?
+    let itemType: MenuItemType
     
-    public let itemType: MenuItemType
-    
-    public enum MenuItemType: Equatable {
+    enum MenuItemType: Equatable {
         case button
         case menu(subMenuItems: (String) -> [ListyContextMenuItem])
         
-        public static func == (lhs: MenuItemType, rhs: MenuItemType) -> Bool {
+        static func == (lhs: MenuItemType, rhs: MenuItemType) -> Bool {
             switch (lhs, rhs) {
             case (.button, .button), (.menu, .menu):
                 return true
@@ -30,13 +30,13 @@ public struct ListyContextMenuItem: Identifiable {
             }
         }
         
-        public var isButton: Bool {
+        var isButton: Bool {
             if case .button = self {
                 return true
             }
             return false
         }
-        public var isMenu: Bool {
+        var isMenu: Bool {
             if case .menu = self {
                 return true
             }
@@ -54,6 +54,13 @@ public struct ListyContextMenuItem: Identifiable {
     }
     
     
+    /// Initialiser for a button item
+    /// - Parameters:
+    ///   - title: the menu item's title
+    ///   - systemImage: a systemImage to use for the icon - if nil, no icon will appear
+    ///   - shouldAppear: a closure to control whether or not the menu item should appear
+    ///   - action: the action invoked when the item is selected
+    /// - Returns: a ListyContextMenuItem instance
     public init(title: String, systemImage: String? = nil, shouldAppear: ((String) -> Bool)? = nil, action: @escaping (String) -> ()) {
         id = UUID().uuidString
         itemType = .button
@@ -63,6 +70,13 @@ public struct ListyContextMenuItem: Identifiable {
         self.action = action
     }
     
+    /// Initialiser for a sub-menu item
+    /// - Parameters:
+    ///   - title: the menu item's title
+    ///   - systemImage: a systemImage to use for the icon - if nil, no icon will appear
+    ///   - shouldAppear: a closure to control whether or not the menu item should appear
+    ///   - subMenuItems: the sub-menu items which will apeear when this item is selected
+    /// - Returns: a ListyContextMenuItem instance
     public init(title: String, systemImage: String? = nil, shouldAppear: ((String) -> Bool)? = nil, subMenuItems: @escaping (String) -> [ListyContextMenuItem]) {
         id = UUID().uuidString
         itemType = .menu(subMenuItems: subMenuItems)
@@ -72,44 +86,41 @@ public struct ListyContextMenuItem: Identifiable {
         action = nil
     }
     
-    public func button(itemId: String) -> AnyView {
+    /// The view for this menuItem
+    /// - Parameter itemId: the item's id
+    /// - Returns: an AnyView instance, either a button row or a sub-menu row
+    public func item(itemId: String) -> AnyView {
         
         if shouldAppear(itemId) == true {
             
-            let button = Button(action: {
-                self.action?(itemId)
-            }) {
-                Text(self.title)
+            switch itemType {
+            case .button:
                 
-                if let iconName = iconName {
-                    Image(systemName: iconName)
-                }
-            }
-            
-            return AnyView(button)
-        }
-        
-        return AnyView(EmptyView())
-    }
-    
-    public func menu(itemId: String) -> AnyView {
-        
-        if shouldAppear(itemId) {
-            
-            let menu = Menu {
-                ForEach(self.itemType.subMenuItems(parentId: itemId)) { menuItem in
-                    If(menuItem.itemType.isButton) {
-                        menuItem.button(itemId: itemId)
-                    }
-                    If(menuItem.itemType.isMenu) {
-                        menuItem.menu(itemId: itemId)
+                let button = Button(action: {
+                    self.action?(itemId)
+                }) {
+                    Text(self.title)
+                    
+                    if let iconName = iconName {
+                        Image(systemName: iconName)
                     }
                 }
-            } label: {
-                Label(self.title, systemImage: iconName ?? "chevron.right")
+                
+                return AnyView(button)
+                
+            case .menu(let subMenuItems):
+                
+                let menu = Menu {
+                    ForEach(subMenuItems(itemId)) { menuItem in
+                        menuItem.item(itemId: itemId)
+                    }
+                } label: {
+                    Label(self.title, systemImage: iconName ?? "chevron.right")
+                }
+                
+                return AnyView(menu)
             }
             
-            return AnyView(menu)
         }
         
         return AnyView(EmptyView())

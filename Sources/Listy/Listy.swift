@@ -192,15 +192,10 @@ public struct Listy<DataSource: ListyDataSource>: View {
         .lineLimit(1)
     }
     
-    private func titleBarMenuItems() -> ForEach<[ListyContextMenuItem], String, TupleView<(If, If)>> {
+    private func titleBarMenuItems() -> ForEach<[ListyContextMenuItem], String, AnyView> {
         
         return ForEach(titleBarContextMenuItems) { menuItem in
-            If(menuItem.itemType.isButton) {
-                menuItem.button(itemId: "")
-            }
-            If(menuItem.itemType.isMenu) {
-                menuItem.menu(itemId: "")
-            }
+            menuItem.item(itemId: "")
         }
     }
 }
@@ -208,6 +203,11 @@ public struct Listy<DataSource: ListyDataSource>: View {
 
 extension Listy {
     
+    /// A title for the list. If none is provided, the list appears a just a list. If it is provided, the title works in an identical way to a NavigationController's large title
+    /// which resizes to small & centres at the top in a "navBar" when the user scrolls up
+    /// - Parameters:
+    ///   - title: a binding to a String var used for the title
+    ///   - color: a binding to a UIColor var used for the title's text colour
     public func title(_ title: Binding<String>, color: Binding<UIColor>? = nil) -> Self {
         var copy = self
         copy._title = title
@@ -217,18 +217,26 @@ extension Listy {
         return copy
     }
     
+    /// The colour to use for the "navBar" which will appear if he user scrolls up (only if a title is set)
+    /// - Parameter color: a binding to a UIColor var used for the titleBar's colour
     public func titleBarColor(_ color: Binding<UIColor>) -> Self {
         var copy = self
         copy._titleBarColor = color
         return copy
     }
     
+    /// Long-pressing on the title will present a context menu if items are provided here
+    /// - Parameter items: context menu items to present
     public func titleMenuItems(_ items: [ListyContextMenuItem]) -> Self {
         var copy = self
         copy.titleBarContextMenuItems = items
         return copy
     }
     
+    /// Set this for a left "barButtonItem" to appear (requires that "title" is not nil)
+    /// - Parameters:
+    ///   - imageSystemName: the systemName for the Image
+    ///   - action: the action to invoke when tapping the button
     public func leftBarItem(imageSystemName: String, action: @escaping () -> ()) -> Self {
         var copy = self
         copy.leftBarButtonImageName = imageSystemName
@@ -236,6 +244,10 @@ extension Listy {
         return copy
     }
     
+    /// Set this for a right "barButtonItem" to appear (requires that "title" is not nil)
+    /// - Parameters:
+    ///   - imageSystemName: the systemName for the Image
+    ///   - action: the action to invoke when tapping the button
     public func rightBarItem(imageSystemName: String, action: @escaping () -> ()) -> Self {
         var copy = self
         copy.rightBarButtonImageName = imageSystemName
@@ -243,28 +255,38 @@ extension Listy {
         return copy
     }
     
+    /// If set to true, each list item will have a "reorder" icon for dragging to reorder
+    /// - Parameter allowsRowDragToReorder: a binding to a Bool var which determines whether the items can be dragged to reorder
     public func allowsRowDragToReorder(_ allowsRowDragToReorder: Binding<Bool>) -> Self {
         var copy = self
         copy._allowsRowDragToReorder = allowsRowDragToReorder
         return copy
     }
     
+    /// The action which will be invoked after dragging & reordering
+    /// - Parameter action: a closure with moved from & moved to parameters
     public func onMove(_ action: @escaping (Int, Int) -> ()) -> Self {
         return self
     }
     
+    /// The action which will be invoked when the user taps a row
+    /// - Parameter tapAction: a closure with the item identifier parameter
     public func onTapped(_ tapAction: @escaping (String) -> ()) -> Self {
         var copy = self
         copy.itemTapAction = tapAction
         return copy
     }
     
+    /// Set this to make a context menu appear if the user long-presses on a list item
+    /// - Parameter items: the context menu items
     public func itemContextMenuItems(_ items: [ListyContextMenuItem]) -> Self {
         var copy = self
         copy.itemContextMenuItems = items
         return copy
     }
     
+    /// Used to force a refresh of the list contents
+    /// - Parameter refresh: a binding to a Bool var - the refresh will happen whenever this value is toggled (slightly hacky I know...)
     public func refresh(_ refresh: Binding<Bool>) -> Self {
         var copy = self
         copy._refresh = refresh
