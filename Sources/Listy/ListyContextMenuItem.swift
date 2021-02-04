@@ -5,6 +5,7 @@
 //
 
 import SwiftUI
+import FWCommonProtocols
 
 
 public struct ListyContextMenuItem: Identifiable {
@@ -12,7 +13,7 @@ public struct ListyContextMenuItem: Identifiable {
     public let id: String
     
     let title: String
-    let iconName: String?
+    let iconName: SystemImageNaming?
     let shouldAppear: ((String) -> Bool)
     let action: ((String) -> ())?
     let itemType: MenuItemType
@@ -61,7 +62,7 @@ public struct ListyContextMenuItem: Identifiable {
     ///   - shouldAppear: a closure to control whether or not the menu item should appear
     ///   - action: the action invoked when the item is selected
     /// - Returns: a ListyContextMenuItem instance
-    public init(title: String, systemImage: String? = nil, shouldAppear: ((String) -> Bool)? = nil, action: @escaping (String) -> ()) {
+    public init(title: String, systemImage: SystemImageNaming? = nil, shouldAppear: ((String) -> Bool)? = nil, action: @escaping (String) -> ()) {
         id = UUID().uuidString
         itemType = .button
         self.title = title
@@ -77,7 +78,7 @@ public struct ListyContextMenuItem: Identifiable {
     ///   - shouldAppear: a closure to control whether or not the menu item should appear
     ///   - subMenuItems: the sub-menu items which will apeear when this item is selected
     /// - Returns: a ListyContextMenuItem instance
-    public init(title: String, systemImage: String? = nil, shouldAppear: ((String) -> Bool)? = nil, subMenuItems: @escaping (String) -> [ListyContextMenuItem]) {
+    public init(title: String, systemImage: SystemImageNaming? = nil, shouldAppear: ((String) -> Bool)? = nil, subMenuItems: @escaping (String) -> [ListyContextMenuItem]) {
         id = UUID().uuidString
         itemType = .menu(subMenuItems: subMenuItems)
         self.title = title
@@ -102,7 +103,7 @@ public struct ListyContextMenuItem: Identifiable {
                     Text(self.title)
                     
                     if let iconName = iconName {
-                        Image(systemName: iconName)
+                        Image(systemName: iconName.systemImageName)
                     }
                 }
                 
@@ -115,7 +116,7 @@ public struct ListyContextMenuItem: Identifiable {
                         menuItem.item(itemId: itemId)
                     }
                 } label: {
-                    Label(self.title, systemImage: iconName ?? "chevron.right")
+                    Label(self.title, systemImage: iconName?.systemImageName ?? "chevron.right")
                 }
                 
                 return AnyView(menu)

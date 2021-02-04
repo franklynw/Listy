@@ -169,6 +169,14 @@ public init(title: String, systemImage: String? = nil, shouldAppear: ((String) -
 * subMenuItems - an array of ListyContextMenuItems for the sub-menu
 
 
+## Dependencies
+
+Requires -
+
+* SwiftUITrackableScrollView, which is linked. Take a look at it [here](https://github.com/maxnatchanon/trackable-scroll-view)
+* FWCommonProtocols, which is linked. GitHub page is [here](https://github.com/franklynw/FWCommonProtocols)
+
+
 ## Issues
 
 There is one annoying issue (so far!) where if you drag to reorder, but release the item before moving it, the highlighted row remains highlighted. If anyone can figure out how to solve this, I'll be really happy...
