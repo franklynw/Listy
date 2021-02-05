@@ -25,10 +25,8 @@ var body: some View {
             .title(viewModel.title, color: viewModel.titleColor)
             .titleBarColor(viewModel.titleBarColor)
             .titleMenuItems(viewModel.titleBarContextMenuItems)
-            .leftBarItem(imageSystemName: "gearshape") {
-                isShowingActionSheet.toggle()
-            }
-            .rightBarItem(imageSystemName: "plus", action: viewModel.addItem)
+            .leftBarItem(.menu(menuItems: viewModel.leftBarItemContextMenuItems, iconName: Image.SystemName.ellipsis))
+            .rightBarItem(.button(iconName: Image.SystemName.plus, action: viewModel.addItem))
             .allowsRowDragToReorder(viewModel.canReorderRows)
             .onTapped(viewModel.completeItem)
             .itemContextMenuItems(viewModel.itemContextMenuItems)
@@ -89,11 +87,11 @@ If you provide a title, you can also have left & right bar buttons. If no title 
 ```swift
 Listy(viewModel)
     .title(viewModel.title, color: viewModel.titleColor) // the title is needed or it's a no-op
-    .leftBarItem(imageSystemName: "gearshape") { // trailing closure syntax
-        isShowingActionSheet.toggle()
-    }
-    .rightBarItem(imageSystemName: "plus", action: viewModel.addItem) // or a function
+    .leftBarItem(.menu(menuItems: viewModel.leftBarItemContextMenuItems, iconName: Image.SystemName.ellipsis))
+    .rightBarItem(.button(iconName: Image.SystemName.plus, action: viewModel.addItem))
 ```
+
+You have the option of adding the item as a button or as a menu, as shown above
 
 ### Enable or disable row reordering by dragging
 

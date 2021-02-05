@@ -31,10 +31,8 @@ public struct Listy<DataSource: ListyDataSource>: View {
     @Binding private var title: String
     @Binding private var titleColor: UIColor
     
-    private var leftBarButtonAction: (() -> ())?
-    private var leftBarButtonImageName: SystemImageNaming?
-    private var rightBarButtonAction: (() -> ())?
-    private var rightBarButtonImageName: SystemImageNaming?
+    private var leftBarButtonItem: BarButtonType?
+    private var rightBarButtonItem: BarButtonType?
     private var itemTapAction: ((String) -> ())?
     private var itemContextMenuItems: [ListyContextMenuItem] = []
     private var titleBarContextMenuItems: [ListyContextMenuItem] = []
@@ -64,6 +62,57 @@ public struct Listy<DataSource: ListyDataSource>: View {
     private let minTitleScale: CGFloat = 0.9
     private let mainTitleDisappearedDistance: CGFloat = 26
     private let smallTitleFadeSpeed: CGFloat = 4
+    
+    public enum BarButtonType {
+        case button(iconName: SystemImageNaming, action: () -> ())
+        case menu(menuItems: [ListyContextMenuItem], iconName: SystemImageNaming)
+        
+        func button(_ color: UIColor) -> AnyView {
+
+            switch self {
+            case .button(let iconName, let action):
+
+                let button = Button {
+                    action()
+                } label: {
+                    Image(systemName: iconName.systemImageName)
+                        .resizable()
+                        .frame(width: 22, height: 22)
+                        .font(Font.title3.weight(.light))
+                        .accentColor(Color(color))
+                }
+                
+                return AnyView(button)
+
+            case .menu(let menuItems, let iconName):
+                
+                let menu = Menu {
+                    ForEach(menuItems) { menuItem in
+                        menuItem.item(itemId: "")
+                    }
+                } label: {
+                    Image(systemName: iconName.systemImageName)
+                        .resizable()
+                        .frame(width: 22, height: 22)
+                        .font(Font.title3.weight(.light))
+                        .accentColor(Color(color))
+                }
+
+                return AnyView(menu)
+            }
+        }
+        
+        static var emptyButton: AnyView {
+            
+            let image = Image(systemName: "")
+                .resizable()
+                .frame(width: 22, height: 22)
+                .font(Font.title3.weight(.light))
+                .opacity(0)
+            
+            return AnyView(image)
+        }
+    }
     
     
     public init(_ viewModel: DataSource) {
@@ -97,17 +146,13 @@ public struct Listy<DataSource: ListyDataSource>: View {
                     
                     HStack {
                         
-                        Button {
-                            leftBarButtonAction?()
-                        } label: {
-                            Image(systemName: leftBarButtonAction == nil ? "gearshape" : leftBarButtonImageName!.systemImageName)
-                                .resizable()
-                                .frame(width: 22, height: 22)
-                                .opacity(leftBarButtonAction == nil ? 0 : 1)
-                                .font(Font.title3.weight(.light))
-                                .accentColor(Color(titleColor))
+                        if let leftBarButtonItem = leftBarButtonItem {
+                            leftBarButtonItem.button(titleColor)
+                                .padding(EdgeInsets(top: 0, leading: 12, bottom: 0, trailing: 8))
+                        } else {
+                            BarButtonType.emptyButton
+                                .padding(EdgeInsets(top: 0, leading: 12, bottom: 0, trailing: 8))
                         }
-                        .padding(EdgeInsets(top: 0, leading: 12, bottom: 0, trailing: 8))
                         
                         Spacer()
                         
@@ -120,17 +165,13 @@ public struct Listy<DataSource: ListyDataSource>: View {
                         
                         Spacer()
                         
-                        Button {
-                            rightBarButtonAction?()
-                        } label: {
-                            Image(systemName: rightBarButtonAction == nil ? "gearshape" : rightBarButtonImageName!.systemImageName)
-                                .resizable()
-                                .frame(width: 22, height: 22)
-                                .opacity(rightBarButtonAction == nil ? 0 : 1)
-                                .font(Font.title3.weight(.light))
-                                .accentColor(Color(titleColor))
+                        if let rightBarButtonItem = rightBarButtonItem {
+                            rightBarButtonItem.button(titleColor)
+                                .padding(EdgeInsets(top: 0, leading: 8, bottom: 0, trailing: 12))
+                        } else {
+                            BarButtonType.emptyButton
+                                .padding(EdgeInsets(top: 0, leading: 8, bottom: 0, trailing: 12))
                         }
-                        .padding(EdgeInsets(top: 0, leading: 8, bottom: 0, trailing: 12))
                     }
                 }
             }
@@ -236,23 +277,19 @@ extension Listy {
     
     /// Set this for a left "barButtonItem" to appear (requires that "title" is not nil)
     /// - Parameters:
-    ///   - imageSystemName: the systemName for the Image
-    ///   - action: the action to invoke when tapping the button
-    public func leftBarItem(imageSystemName: SystemImageNaming, action: @escaping () -> ()) -> Self {
+    ///   - buttonItem: the buttonItem to use, can be a button or a menu
+        public func leftBarItem(_ buttonItem: BarButtonType) -> Self {
         var copy = self
-        copy.leftBarButtonImageName = imageSystemName
-        copy.leftBarButtonAction = action
+        copy.leftBarButtonItem = buttonItem
         return copy
     }
     
     /// Set this for a right "barButtonItem" to appear (requires that "title" is not nil)
     /// - Parameters:
-    ///   - imageSystemName: the systemName for the Image
-    ///   - action: the action to invoke when tapping the button
-    public func rightBarItem(imageSystemName: SystemImageNaming, action: @escaping () -> ()) -> Self {
+    ///   - buttonItem: the buttonItem to use, can be a button or a menu
+    public func rightBarItem(_ buttonItem: BarButtonType) -> Self {
         var copy = self
-        copy.rightBarButtonImageName = imageSystemName
-        copy.rightBarButtonAction = action
+        copy.rightBarButtonItem = buttonItem
         return copy
     }
     
