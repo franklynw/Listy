@@ -9,15 +9,6 @@
           "revision": "f4338a068c1b719e32319b22eb79bb8b2ca544d8",
           "version": "1.0.0"
         }
-      },
-      {
-        "package": "SwiftUITrackableScrollView",
-        "repositoryURL": "https://github.com/maxnatchanon/trackable-scroll-view.git",
-        "state": {
-          "branch": "master",
-          "revision": "4b094575c2370c3341d0b377a27b46bda4f937f7",
-          "version": null
-        }
       }
     ]
   },
