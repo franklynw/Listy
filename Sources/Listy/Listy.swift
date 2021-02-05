@@ -24,6 +24,7 @@ public struct Listy<DataSource: ListyDataSource>: View {
     @State private var smallTitleOpacity: Double = 0
     @State private var largeTitleOpacity: Double = 1
     @State internal var swipeDelete = SwipeDelete(itemId: "", offset: 0)
+    @State internal var didFastSwipe = false
     
     @Binding private var refresh: Bool
     @Binding private var allowsRowDragToReorder: Bool

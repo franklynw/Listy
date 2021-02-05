@@ -47,6 +47,9 @@ extension Listy {
                 .offset(x: adjustedTextOffset)
         }
         .clipped()
+        .onTapGesture {
+            deleteItem?(swipeDelete.itemId)
+        }
         
         return AnyView(rectangle)
     }
@@ -59,7 +62,7 @@ extension Listy {
             }
             .onEnded { _ in
                 
-                guard deleteItem != nil else {
+                guard deleteItem != nil, !didFastSwipe else {
                     return
                 }
                 
@@ -71,20 +74,28 @@ extension Listy {
     
     private func swipeDidChange(_ gesture: DragGesture.Value, geometry: GeometryProxy, forItemWithId id: String) {
         
-        guard let deleteItem = deleteItem else {
+        guard let deleteItem = deleteItem, !didFastSwipe else {
             return
         }
         
         let translation = gesture.translation.width
         
         if gesture.predictedEndTranslation.width < geometry.size.width * -2 && translation < geometry.size.width / -3 {
-            deleteItem(id)
-            swipeDidEnd()
+            
+            didFastSwipe = true
+            swipeDelete = SwipeDelete(itemId: id, offset: -geometry.size.width)
+            
+            // delay it for a tiny bit so the Delete graphic has time to be seen
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                deleteItem(id)
+                swipeDidEnd()
+            }
+            
             return
         }
         
-        draggingFinished = false
         swipeDelete = SwipeDelete(itemId: id, offset: min(0, translation))
+        draggingFinished = false
         
         if translation < geometry.size.width * -0.95 {
             deleteItem(id)
@@ -96,5 +107,6 @@ extension Listy {
         let id = swipeDelete.itemId
         swipeDelete = SwipeDelete(itemId: id, offset: 0)
         draggingFinished = true
+        didFastSwipe = false
     }
 }
