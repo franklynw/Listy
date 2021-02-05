@@ -105,6 +105,7 @@ Listy(viewModel)
 ### Item moved action
 
 Will be invoked after an item has been dragged & reordered
+** NOT IMPLEMENTED YET **
 
 ```swift
 Listy(viewModel)
@@ -112,6 +113,16 @@ Listy(viewModel)
         viewModel.itemMoved($0, $1)
     }
 ```
+
+### Item delete action
+
+This is invoked if the user swipes to delete an item. The swipe-to-delete functionality doesn't appear unless this action is provided
+
+```swift
+Listy(viewModel)
+    .onDelete(viewModel.deleteItem)
+```
+
 
 ### Item tapped action
 
