@@ -24,7 +24,11 @@ public struct Listy<DataSource: ListyDataSource>: View {
     @State private var smallTitleOpacity: Double = 0
     @State private var largeTitleOpacity: Double = 1
     @State internal var swipeDelete = SwipeDelete(itemId: "", offset: 0)
-    @State internal var didFastSwipe = false
+    @State internal var swipeDeletedId = ""
+    @State internal var swipeCommitted = false
+    @State internal var initialSwipeOffset: CGFloat = 0
+    
+    internal let textPadding: CGFloat = 8
     
     @Binding private var refresh: Bool
     @Binding private var allowsRowDragToReorder: Bool
@@ -53,6 +57,8 @@ public struct Listy<DataSource: ListyDataSource>: View {
                 barOpacity = Double(opacity)
                 smallTitleOpacity = $0 >= mainTitleDisappearedDistance ? 1 : 0
                 largeTitleOpacity = 1 - smallTitleOpacity
+                
+                swipeDidEnd()
             }
         )
     }
@@ -202,10 +208,14 @@ public struct Listy<DataSource: ListyDataSource>: View {
                             
                             DataSource.ListyItemType(viewModel: listItemViewModel, itemContextMenuItems: itemContextMenuItems)
                                 .dragged($currentlyDraggedItem)
-                                .offset(x: swipeDelete.itemId == listItemViewModel.id ? swipeDelete.offset : 0)
+                                .offset(x: swipeDelete.itemId == listItemViewModel.id ? min(swipeDelete.offset, 0) : 0)
+                                .opacity(swipeDeletedId == listItemViewModel.id ? 0 : 1)
                                 .onTapGesture {
+                                    if initialSwipeOffset == 0 {
+                                        itemTapAction?(listItemViewModel.id)
+                                    }
                                     currentlyDraggedItem = nil
-                                    itemTapAction?(listItemViewModel.id)
+                                    swipeDidEnd()
                                 }
                                 .gesture(swipeToDeleteGesture(with: geometry, forItemWithId: listItemViewModel.id))
                             
