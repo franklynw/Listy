@@ -15,7 +15,7 @@ public struct Listy<DataSource: ListyDataSource>: View {
     
     @StateObject private var dataSource: DataSource
     
-    @State private var currentlyDraggedItem: ItemViewModel?
+    @State internal var currentlyDraggedItem: ItemViewModel?
     @State private var changedView = false
     @State internal var draggingFinished = false
     

@@ -54,6 +54,7 @@ extension Listy {
         
         let gesture = DragGesture()
             .onChanged { gesture in
+                currentlyDraggedItem = nil
                 swipeDidChange(gesture, geometry: geometry, forItemWithId: id)
             }
             .onEnded { _ in
