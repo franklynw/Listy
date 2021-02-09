@@ -133,6 +133,12 @@ extension Listy {
             swipeDeletedId = id
         }
         
+        // this feels a little hacky, but we need the swipeDeletedId to be the id of the item being deleted, until it has finished animated
+        // then it needs to be nil so that the behaviour of the list goes back to normal. There's no animation completion in SwiftUI
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            swipeDeletedId = nil
+        }
+        
         deleteItem?(id)
         swipeDidEnd()
     }

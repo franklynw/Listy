@@ -24,7 +24,7 @@ public struct Listy<DataSource: ListyDataSource>: View {
     @State private var smallTitleOpacity: Double = 0
     @State private var largeTitleOpacity: Double = 1
     @State internal var swipeDelete = SwipeDelete(itemId: "", offset: 0)
-    @State internal var swipeDeletedId = ""
+    @State internal var swipeDeletedId: String?
     @State internal var swipeCommitted = false
     @State internal var initialSwipeOffset: CGFloat = 0
     
@@ -62,7 +62,6 @@ public struct Listy<DataSource: ListyDataSource>: View {
             }
         )
     }
-    
     
     private let titleInitialOffset: CGFloat = 15
     private let spaceForLargeTitle: CGFloat = largeTitleSpace / 2
@@ -141,12 +140,13 @@ public struct Listy<DataSource: ListyDataSource>: View {
             }
             
             if !title.isEmpty {
+                
                 ZStack {
                     
                     Rectangle()
                         .foregroundColor(.white)
                         .opacity(barOpacity)
-                        .frame(height: 44)
+                        .frame(height: 48)
                         .overlay(
                             Rectangle()
                                 .foregroundColor(Color(titleBarColor))
@@ -186,69 +186,71 @@ public struct Listy<DataSource: ListyDataSource>: View {
             
             TrackableScrollView(Axis.Set.vertical, showIndicators: true, contentOffset: scrollViewOffset) {
                 
-                HStack {
-                    Text(title)
-                        .multilineTextAlignment(.leading)
-                        .font(Font.title.weight(.semibold))
-                        .foregroundColor(Color(titleColor))
-                        .opacity(largeTitleOpacity)
-                        .animation(.linear)
-                        .scaleEffect(CGSize(width: titleScale, height: titleScale), anchor: .leading)
-                        .padding(EdgeInsets(top: 0, leading: 12, bottom: 0, trailing: 0))
-                        .contextMenu(menuItems: { titleBarMenuItems() })
-                    
-                    Spacer()
-                }
-                
-                ForEach(dataSource.listItemViewModels) { listItemViewModel in
-                    
+                VStack {
                     HStack {
+                        Text(title)
+                            .multilineTextAlignment(.leading)
+                            .font(Font.title.weight(.semibold))
+                            .foregroundColor(Color(titleColor))
+                            .opacity(largeTitleOpacity)
+                            .animation(.linear)
+                            .scaleEffect(CGSize(width: titleScale, height: titleScale), anchor: .leading)
+                            .padding(EdgeInsets(top: 0, leading: 12, bottom: 0, trailing: 0))
+                            .contextMenu(menuItems: { titleBarMenuItems() })
                         
-                        GeometryReader { geometry in
+                        Spacer()
+                    }
+                    
+                    ForEach(dataSource.listItemViewModels) { listItemViewModel in
+                        
+                        HStack {
                             
-                            DataSource.ListyItemType(viewModel: listItemViewModel, itemContextMenuItems: itemContextMenuItems)
-                                .dragged($currentlyDraggedItem)
-                                .offset(x: swipeDelete.itemId == listItemViewModel.id ? min(swipeDelete.offset, 0) : 0)
-                                .opacity(swipeDeletedId == listItemViewModel.id ? 0 : 1)
-                                .onTapGesture {
-                                    if initialSwipeOffset == 0 {
-                                        itemTapAction?(listItemViewModel.id)
+                            GeometryReader { geometry in
+                                
+                                DataSource.ListyItemType(viewModel: listItemViewModel, itemContextMenuItems: itemContextMenuItems)
+                                    .dragged($currentlyDraggedItem)
+                                    .offset(x: swipeDelete.itemId == listItemViewModel.id ? min(swipeDelete.offset, 0) : 0)
+                                    .opacity(swipeDeletedId == listItemViewModel.id ? 0 : 1)
+                                    .onTapGesture {
+                                        if initialSwipeOffset == 0 {
+                                            itemTapAction?(listItemViewModel.id)
+                                        }
+                                        currentlyDraggedItem = nil
+                                        swipeDidEnd()
                                     }
-                                    currentlyDraggedItem = nil
-                                    swipeDidEnd()
+                                    .gesture(swipeToDeleteGesture(with: geometry, forItemWithId: listItemViewModel.id))
+                                
+                                if swipeDelete.itemId == listItemViewModel.id {
+                                    swipeToDeleteView(geometry: geometry)
+                                        .animation(.easeOut(duration: 0.2))
                                 }
-                                .gesture(swipeToDeleteGesture(with: geometry, forItemWithId: listItemViewModel.id))
+                            }
                             
-                            if swipeDelete.itemId == listItemViewModel.id {
-                                swipeToDeleteView(geometry: geometry)
-                                    .animation(.easeOut(duration: 0.2))
+                            Spacer()
+                            
+                            if allowsRowDragToReorder, dataSource.listItemViewModels.count > 1 {
+                                
+                                Image(systemName: "line.horizontal.3")
+                                    .foregroundColor(Color(.systemGray))
+                                    .opacity(0.5)
+                                    .padding(EdgeInsets(top: 10, leading: 5, bottom: 10, trailing: 5))
+                                    .contentShape(Rectangle())
+                                    .onDrag {
+                                        draggingFinished = false
+                                        withAnimation {
+                                            currentlyDraggedItem = listItemViewModel
+                                        }
+                                        return NSItemProvider(object: listItemViewModel.id as NSString)
+                                    }
                             }
                         }
-                            
-                        Spacer()
-                                
-                        if allowsRowDragToReorder {
-                            
-                            Image(systemName: "line.horizontal.3")
-                                .foregroundColor(Color(.systemGray))
-                                .opacity(0.5)
-                                .padding(EdgeInsets(top: 10, leading: 5, bottom: 10, trailing: 5))
-                                .contentShape(Rectangle())
-                                .onDrag {
-                                    draggingFinished = false
-                                    withAnimation {
-                                        currentlyDraggedItem = listItemViewModel
-                                    }
-                                    return NSItemProvider(object: listItemViewModel.id as NSString)
-                                }
-                        }
+                        .onDrop(of: [UTType.text], delegate: DraggingDelegate<DataSource>(item: listItemViewModel, dataSource: dataSource, viewModels: $dataSource.listItemViewModels, currentlyDraggedItem: $currentlyDraggedItem, changedView: $changedView, draggingFinished: $draggingFinished))
+                        
                     }
-                    .onDrop(of: [UTType.text], delegate: DraggingDelegate<DataSource>(item: listItemViewModel, dataSource: dataSource, viewModels: $dataSource.listItemViewModels, currentlyDraggedItem: $currentlyDraggedItem, changedView: $changedView, draggingFinished: $draggingFinished))
-                    
+                    .animation(.default, value: dataSource.listItemViewModels)
+                    .padding(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 20))
+                    .id(refresh)
                 }
-                .animation(.default, value: dataSource.listItemViewModels)
-                .padding(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 20))
-                .id(refresh)
             }
             .onDrop(of: [UTType.text], delegate: DraggingFailedDelegate<DataSource>(currentlyDraggedItem: $currentlyDraggedItem, changedView: $changedView, draggingFinished: $draggingFinished))
             .offset(y: _title.wrappedValue.isEmpty ? 0 : -8)
