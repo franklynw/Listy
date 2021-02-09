@@ -17,21 +17,17 @@ extension Listy {
     
     func swipeToDeleteView(geometry: GeometryProxy) -> AnyView {
         
-        // is there a better way of doing this?
+        let textWidth = deleteTextWidth()
+        let rightEdge = geometry.size.width + textWidth / 2
+        let x = rightEdge + swipeDelete.offset + initialSwipeOffset + textPadding
+        let adjustedX: CGFloat
         
-        let deleteText = NSLocalizedString("Delete", comment: "Delete")
-        let label = UILabel()
-        label.font = UIFont.preferredFont(style: .body)
-        label.text = deleteText
-        let textPadding: CGFloat = 8
-        let textWidth = label.sizeThatFits(CGSize(width: CGFloat.greatestFiniteMagnitude, height: CGFloat.greatestFiniteMagnitude)).width
-        let textOffset = swipeDelete.offset + (geometry.size.width + textWidth) / 2 + textPadding
-        let adjustedTextOffset: CGFloat
-        
-        if -swipeDelete.offset > geometry.size.width * 0.7 {
-            adjustedTextOffset = textOffset
+        if x < geometry.size.width * 0.4 {
+            // if we drag far enough left, the "Delete" needs to fly to the left edge of the red bar
+            adjustedX = x
         } else {
-            adjustedTextOffset = max(textOffset, textWidth * 2 - textPadding * 1.5)
+            // otherwise it needs to be pinned to the right edge
+            adjustedX = max(rightEdge - textWidth - textPadding, x)
         }
         
         let rectangle = ZStack {
@@ -39,14 +35,17 @@ extension Listy {
             Rectangle()
                 .frame(width: geometry.size.width, height: geometry.size.height)
                 .foregroundColor(.red)
-                .offset(x: swipeDelete.offset + geometry.size.width)
+                .offset(x: swipeDelete.offset + geometry.size.width + initialSwipeOffset)
             
-            Text(deleteText)
+            Text(NSLocalizedString("Delete", comment: "Delete"))
                 .font(.body)
                 .foregroundColor(.white)
-                .offset(x: adjustedTextOffset)
+                .position(x: adjustedX, y: geometry.size.height / 2)
         }
         .clipped()
+        .onTapGesture {
+            deleteFromList(swipeDelete.itemId)
+        }
         
         return AnyView(rectangle)
     }
@@ -55,11 +54,12 @@ extension Listy {
         
         let gesture = DragGesture()
             .onChanged { gesture in
+                currentlyDraggedItem = nil
                 swipeDidChange(gesture, geometry: geometry, forItemWithId: id)
             }
             .onEnded { _ in
                 
-                guard deleteItem != nil else {
+                guard deleteItem != nil, !swipeCommitted else {
                     return
                 }
                 
@@ -71,30 +71,87 @@ extension Listy {
     
     private func swipeDidChange(_ gesture: DragGesture.Value, geometry: GeometryProxy, forItemWithId id: String) {
         
-        guard let deleteItem = deleteItem else {
+        guard deleteItem != nil, !swipeCommitted else {
             return
         }
         
         let translation = gesture.translation.width
         
         if gesture.predictedEndTranslation.width < geometry.size.width * -2 && translation < geometry.size.width / -3 {
-            deleteItem(id)
-            swipeDidEnd()
+            
+            // fast swipe to delete
+            
+            swipeCommitted = true
+            swipeDelete = SwipeDelete(itemId: id, offset: -geometry.size.width)
+            
+            // delay it for a tiny bit so the Delete graphic has time to be seen
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                deleteFromList(id)
+            }
+            
             return
         }
         
+        swipeDelete = SwipeDelete(itemId: id, offset: translation)
         draggingFinished = false
-        swipeDelete = SwipeDelete(itemId: id, offset: min(0, translation))
         
-        if translation < geometry.size.width * -0.95 {
-            deleteItem(id)
-            swipeDidEnd()
+        if translation + initialSwipeOffset < geometry.size.width * -0.95 {
+            swipeCommitted = true
+            deleteFromList(id)
         }
     }
     
-    private func swipeDidEnd() {
+    internal func swipeDidEnd() {
+        
         let id = swipeDelete.itemId
-        swipeDelete = SwipeDelete(itemId: id, offset: 0)
-        draggingFinished = true
+        
+        if swipeCommitted {
+            
+            swipeDelete = SwipeDelete(itemId: id, offset: 0)
+            draggingFinished = true
+            swipeCommitted = false
+            initialSwipeOffset = 0
+            
+        } else {
+            
+            let textWidth = deleteTextWidth()
+            
+            if swipeDelete.offset > -textWidth {
+                swipeCommitted = true
+                swipeDidEnd()
+                return
+            }
+            
+            initialSwipeOffset = -textWidth - textPadding * 2
+            swipeDelete = SwipeDelete(itemId: id, offset: 0)
+        }
+    }
+    
+    private func deleteFromList(_ id: String) {
+        
+        withAnimation(nil) {
+            swipeDeletedId = id
+        }
+        
+        // this feels a little hacky, but we need the swipeDeletedId to be the id of the item being deleted, until it has finished animated
+        // then it needs to be nil so that the behaviour of the list goes back to normal. There's no animation completion in SwiftUI
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            swipeDeletedId = nil
+        }
+        
+        deleteItem?(id)
+        swipeDidEnd()
+    }
+    
+    private func deleteTextWidth() -> CGFloat {
+        
+        // is there a better way of doing this?
+        
+        let deleteText = NSLocalizedString("Delete", comment: "Delete")
+        let label = UILabel()
+        label.font = UIFont.preferredFont(style: .body)
+        label.text = deleteText
+        
+        return label.sizeThatFits(CGSize(width: CGFloat.greatestFiniteMagnitude, height: CGFloat.greatestFiniteMagnitude)).width
     }
 }
