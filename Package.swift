@@ -5,6 +5,7 @@ import PackageDescription
 
 let package = Package(
     name: "Listy",
+    defaultLocalization: "en",
     platforms: [
         .iOS(.v14)
     ],
@@ -19,7 +20,8 @@ let package = Package(
     targets: [
         .target(
             name: "Listy",
-            dependencies: ["FWCommonProtocols"]),
+            dependencies: ["FWCommonProtocols"],
+            resources: [.process("Resources")]),
         .testTarget(
             name: "ListyTests",
             dependencies: ["Listy"]),

@@ -37,7 +37,7 @@ extension Listy {
                 .foregroundColor(.red)
                 .offset(x: swipeDelete.offset + geometry.size.width + initialSwipeOffset)
             
-            Text(NSLocalizedString("Delete", comment: "Delete"))
+            Text(NSLocalizedString("Delete", bundle: Bundle.module, comment: "Delete"))
                 .font(.body)
                 .foregroundColor(.white)
                 .position(x: adjustedX, y: geometry.size.height / 2)
