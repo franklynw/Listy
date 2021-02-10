@@ -142,6 +142,24 @@ Listy(viewModel)
     .itemContextMenuItems(viewModel.itemContextMenuItems)
 ```
 
+### List insets
+
+Add insets around the list
+
+```swift
+Listy(viewModel)
+    .contentInsets(EdgeInsets(top: 0, leading: 10, bottom: 30, trailing: 10))
+```
+
+### Row padding
+
+Add padding around the list rows
+
+```swift
+Listy(viewModel)
+    .rowPadding(EdgeInsets(top: 5, leading: 0, bottom: 5, trailing: 0))
+```
+
 ### Force list refresh
 
 If the viewModel toggles the refresh Bool, the list will be redrawn
