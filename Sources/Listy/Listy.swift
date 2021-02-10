@@ -36,6 +36,8 @@ public struct Listy<DataSource: ListyDataSource>: View {
     @Binding private var title: String
     @Binding private var titleColor: UIColor
     
+    private var contentInsets = EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0)
+    private var rowPadding = EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0)
     private var leftBarButtonItem: BarButtonType?
     private var rightBarButtonItem: BarButtonType?
     private var itemTapAction: ((String) -> ())?
@@ -201,56 +203,59 @@ public struct Listy<DataSource: ListyDataSource>: View {
                         Spacer()
                     }
                     
-                    ForEach(dataSource.listItemViewModels) { listItemViewModel in
-                        
-                        HStack {
+                    VStack {
+                        ForEach(dataSource.listItemViewModels) { listItemViewModel in
                             
-                            GeometryReader { geometry in
+                            HStack {
                                 
-                                DataSource.ListyItemType(viewModel: listItemViewModel, itemContextMenuItems: itemContextMenuItems)
-                                    .dragged($currentlyDraggedItem)
-                                    .offset(x: swipeDelete.itemId == listItemViewModel.id ? min(swipeDelete.offset, 0) : 0)
-                                    .opacity(swipeDeletedId == listItemViewModel.id ? 0 : 1)
-                                    .onTapGesture {
-                                        if initialSwipeOffset == 0 {
-                                            itemTapAction?(listItemViewModel.id)
+                                GeometryReader { geometry in
+                                    
+                                    DataSource.ListyItemType(viewModel: listItemViewModel, itemContextMenuItems: itemContextMenuItems)
+                                        .dragged($currentlyDraggedItem)
+                                        .offset(x: swipeDelete.itemId == listItemViewModel.id ? min(swipeDelete.offset, 0) : 0)
+                                        .opacity(swipeDeletedId == listItemViewModel.id ? 0 : 1)
+                                        .onTapGesture {
+                                            if initialSwipeOffset == 0 {
+                                                itemTapAction?(listItemViewModel.id)
+                                            }
+                                            currentlyDraggedItem = nil
+                                            swipeDidEnd()
                                         }
-                                        currentlyDraggedItem = nil
-                                        swipeDidEnd()
+                                        .gesture(swipeToDeleteGesture(with: geometry, forItemWithId: listItemViewModel.id))
+                                    
+                                    if swipeDelete.itemId == listItemViewModel.id {
+                                        swipeToDeleteView(geometry: geometry)
+                                            .animation(.easeOut(duration: 0.2))
                                     }
-                                    .gesture(swipeToDeleteGesture(with: geometry, forItemWithId: listItemViewModel.id))
+                                }
                                 
-                                if swipeDelete.itemId == listItemViewModel.id {
-                                    swipeToDeleteView(geometry: geometry)
-                                        .animation(.easeOut(duration: 0.2))
+                                Spacer()
+                                
+                                if allowsRowDragToReorder, dataSource.listItemViewModels.count > 1 {
+                                    
+                                    Image(systemName: "line.horizontal.3")
+                                        .foregroundColor(Color(.systemGray))
+                                        .opacity(0.5)
+                                        .padding(EdgeInsets(top: 10, leading: 5, bottom: 10, trailing: 5))
+                                        .contentShape(Rectangle())
+                                        .onDrag {
+                                            draggingFinished = false
+                                            withAnimation {
+                                                currentlyDraggedItem = listItemViewModel
+                                            }
+                                            return NSItemProvider(object: listItemViewModel.id as NSString)
+                                        }
                                 }
                             }
+                            .onDrop(of: [UTType.text], delegate: DraggingDelegate<DataSource>(item: listItemViewModel, dataSource: dataSource, viewModels: $dataSource.listItemViewModels, currentlyDraggedItem: $currentlyDraggedItem, changedView: $changedView, draggingFinished: $draggingFinished))
                             
-                            Spacer()
-                            
-                            if allowsRowDragToReorder, dataSource.listItemViewModels.count > 1 {
-                                
-                                Image(systemName: "line.horizontal.3")
-                                    .foregroundColor(Color(.systemGray))
-                                    .opacity(0.5)
-                                    .padding(EdgeInsets(top: 10, leading: 5, bottom: 10, trailing: 5))
-                                    .contentShape(Rectangle())
-                                    .onDrag {
-                                        draggingFinished = false
-                                        withAnimation {
-                                            currentlyDraggedItem = listItemViewModel
-                                        }
-                                        return NSItemProvider(object: listItemViewModel.id as NSString)
-                                    }
-                            }
                         }
-                        .onDrop(of: [UTType.text], delegate: DraggingDelegate<DataSource>(item: listItemViewModel, dataSource: dataSource, viewModels: $dataSource.listItemViewModels, currentlyDraggedItem: $currentlyDraggedItem, changedView: $changedView, draggingFinished: $draggingFinished))
-                        
+                        .animation(.default, value: dataSource.listItemViewModels)
+                        .padding(EdgeInsets(top: allowsRowDragToReorder ? 0 : 10, leading: 20, bottom: allowsRowDragToReorder ? 0 : 10, trailing: 20) + rowPadding)
+                        .id(refresh)
                     }
-                    .animation(.default, value: dataSource.listItemViewModels)
-                    .padding(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 20))
-                    .id(refresh)
                 }
+                .padding(contentInsets)
             }
             .onDrop(of: [UTType.text], delegate: DraggingFailedDelegate<DataSource>(currentlyDraggedItem: $currentlyDraggedItem, changedView: $changedView, draggingFinished: $draggingFinished))
             .offset(y: _title.wrappedValue.isEmpty ? 0 : -8)
@@ -357,6 +362,22 @@ extension Listy {
         return copy
     }
     
+    /// Applies an inset to the list content
+    /// - Parameter contentInsets: an EdgeInsets value
+    public func contentInsets(_ contentInsets: EdgeInsets) -> Self {
+        var copy = self
+        copy.contentInsets = contentInsets
+        return copy
+    }
+    
+    /// Applies an inset to the rows of the list
+    /// - Parameter contentInsets: an EdgeInsets value
+    public func rowPadding(_ rowPadding: EdgeInsets) -> Self {
+        var copy = self
+        copy.rowPadding = rowPadding
+        return copy
+    }
+    
     /// Used to force a refresh of the list contents
     /// - Parameter refresh: a binding to a Bool var - the refresh will happen whenever this value is toggled (slightly hacky I know...)
     public func refresh(_ refresh: Binding<Bool>) -> Self {
@@ -377,4 +398,12 @@ fileprivate var largeTitleSpace: CGFloat {
     let titleHeight = height * 2.395
     
     return titleHeight
+}
+
+
+fileprivate extension EdgeInsets {
+    
+    static func +(_ lhs: EdgeInsets, _ rhs: EdgeInsets) -> EdgeInsets {
+        EdgeInsets(top: lhs.top + rhs.top, leading: lhs.leading + rhs.leading, bottom: lhs.bottom + rhs.bottom, trailing: lhs.trailing + rhs.trailing)
+    }
 }

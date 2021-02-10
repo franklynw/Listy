@@ -2,7 +2,7 @@
 
 A replacement for SwiftUI List, which offers a number of benefits & customisation options
 
-<img src="Resources//Example1.png" alt="Example 1"/> <img src="Resources//Example2.png" alt="Example 2"/> <img src="Resources//Example3.png" alt="Example 3"/>
+<img src="Sources/Listy/Resources//Example1.png" alt="Example 1"/> <img src="Sources/Listy/Resources//Example2.png" alt="Example 2"/> <img src="Sources/Listy/Resources//Example3.png" alt="Example 3"/>
 
 ## Installation
 
