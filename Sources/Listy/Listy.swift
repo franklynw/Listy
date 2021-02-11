@@ -89,6 +89,7 @@ public struct Listy<DataSource: ListyDataSource>: View {
                         .frame(width: 22, height: 22)
                         .font(Font.title3.weight(.light))
                         .accentColor(Color(color))
+                        .padding(EdgeInsets(top: 12, leading: 8, bottom: 12, trailing: 8))
                 }
                 
                 return AnyView(button)
@@ -105,6 +106,7 @@ public struct Listy<DataSource: ListyDataSource>: View {
                         .frame(width: 22, height: 22)
                         .font(Font.title3.weight(.light))
                         .accentColor(Color(color))
+                        .padding(EdgeInsets(top: 12, leading: 8, bottom: 12, trailing: 8))
                 }
 
                 return AnyView(menu)
@@ -118,6 +120,7 @@ public struct Listy<DataSource: ListyDataSource>: View {
                 .frame(width: 22, height: 22)
                 .font(Font.title3.weight(.light))
                 .opacity(0)
+                .padding(EdgeInsets(top: 12, leading: 8, bottom: 12, trailing: 8))
             
             return AnyView(image)
         }
@@ -158,10 +161,10 @@ public struct Listy<DataSource: ListyDataSource>: View {
                         
                         if let leftBarButtonItem = leftBarButtonItem {
                             leftBarButtonItem.button(titleColor)
-                                .padding(EdgeInsets(top: 0, leading: 12, bottom: 0, trailing: 8))
+                                .padding(EdgeInsets(top: 0, leading: 4, bottom: 0, trailing: 0))
                         } else {
                             BarButtonType.emptyButton
-                                .padding(EdgeInsets(top: 0, leading: 12, bottom: 0, trailing: 8))
+                                .padding(EdgeInsets(top: 0, leading: 4, bottom: 0, trailing: 0))
                         }
                         
                         Spacer()
@@ -177,10 +180,10 @@ public struct Listy<DataSource: ListyDataSource>: View {
                         
                         if let rightBarButtonItem = rightBarButtonItem {
                             rightBarButtonItem.button(titleColor)
-                                .padding(EdgeInsets(top: 0, leading: 8, bottom: 0, trailing: 12))
+                                .padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 4))
                         } else {
                             BarButtonType.emptyButton
-                                .padding(EdgeInsets(top: 0, leading: 8, bottom: 0, trailing: 12))
+                                .padding(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 4))
                         }
                     }
                 }
