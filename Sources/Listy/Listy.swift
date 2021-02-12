@@ -35,6 +35,7 @@ public struct Listy<DataSource: ListyDataSource>: View {
     @Binding private var titleBarColor: UIColor
     @Binding private var title: String
     @Binding private var titleColor: UIColor
+    @Binding private var contentOffset: CGFloat
     
     internal var contentInsets = EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0)
     internal var rowPadding = EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0)
@@ -51,6 +52,8 @@ public struct Listy<DataSource: ListyDataSource>: View {
                 return 0
             },
             set: {
+                
+                contentOffset = $0
                 
                 let scale = min(max(minTitleScale, -$0 / titleScaleMultiplier + minTitleScale), 1)
                 titleScale = scale
@@ -134,6 +137,7 @@ public struct Listy<DataSource: ListyDataSource>: View {
         _titleBarColor = Binding<UIColor>(get: { .clear }, set: { _ in })
         _title = Binding<String>(get: { "" }, set: { _ in })
         _titleColor = Binding<UIColor>(get: { .label }, set: { _ in })
+        _contentOffset = Binding<CGFloat>(get: { 0 }, set: { _ in })
     }
     
     public var body: some View {
@@ -304,6 +308,12 @@ extension Listy {
     internal func setRefresh(_ refresh: Binding<Bool>) -> Self {
         var copy = self
         copy._refresh = refresh
+        return copy
+    }
+    
+    internal func setContentOffset(_ contentOffset: Binding<CGFloat>) -> Self {
+        var copy = self
+        copy._contentOffset = contentOffset
         return copy
     }
 }

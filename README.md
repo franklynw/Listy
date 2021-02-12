@@ -160,6 +160,20 @@ Listy(viewModel)
     .rowPadding(EdgeInsets(top: 5, leading: 0, bottom: 5, trailing: 0))
 ```
 
+### Observe the (vertical) content offset
+
+If you need to react to the list's vertical content offset -
+
+```swift
+@State var offset: CGFloat = 0
+```
+then -
+
+```swift
+Listy(viewModel)
+    .observeContentOffset($offset)
+```
+
 ### Force list refresh
 
 If the viewModel toggles the refresh Bool, the list will be redrawn

@@ -105,6 +105,12 @@ extension Listy {
         return copy
     }
     
+    /// Provides the vertical content offset of the scrollView
+    /// - Parameter contentOffset: a binding to a CGFloat var
+    public func observeContentOffset(_ contentOffset: Binding<CGFloat>) -> Self {
+        return setContentOffset(contentOffset)
+    }
+    
     /// Used to force a refresh of the list contents
     /// - Parameter refresh: a binding to a Bool var - the refresh will happen whenever this value is toggled (slightly hacky I know...)
     public func refresh(_ refresh: Binding<Bool>) -> Self {
