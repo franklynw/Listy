@@ -196,6 +196,7 @@ public struct Listy<DataSource: ListyDataSource>: View {
             TrackableScrollView(Axis.Set.vertical, showIndicators: true, contentOffset: scrollViewOffset) {
                 
                 VStack {
+                    
                     HStack {
                         Text(title)
                             .multilineTextAlignment(.leading)
@@ -215,7 +216,7 @@ public struct Listy<DataSource: ListyDataSource>: View {
                             
                             HStack {
                                 
-                                GeometryReader { geometry in
+//                                GeometryReader { geometry in
                                     
                                     DataSource.ListyItemType(viewModel: listItemViewModel, itemContextMenuItems: itemContextMenuItems)
                                         .dragged($currentlyDraggedItem)
@@ -228,13 +229,13 @@ public struct Listy<DataSource: ListyDataSource>: View {
                                             currentlyDraggedItem = nil
                                             swipeDidEnd()
                                         }
-                                        .gesture(swipeToDeleteGesture(with: geometry, forItemWithId: listItemViewModel.id))
+//                                        .gesture(swipeToDeleteGesture(with: geometry, forItemWithId: listItemViewModel.id))
                                     
-                                    if swipeDelete.itemId == listItemViewModel.id {
-                                        swipeToDeleteView(geometry: geometry)
-                                            .animation(.easeOut(duration: 0.2))
-                                    }
-                                }
+//                                    if swipeDelete.itemId == listItemViewModel.id {
+//                                        swipeToDeleteView(geometry: geometry)
+//                                            .animation(.easeOut(duration: 0.2))
+//                                    }
+//                                }
                                 
                                 Spacer()
                                 
@@ -255,10 +256,9 @@ public struct Listy<DataSource: ListyDataSource>: View {
                                 }
                             }
                             .onDrop(of: [UTType.text], delegate: DraggingDelegate<DataSource>(item: listItemViewModel, dataSource: dataSource, viewModels: $dataSource.listItemViewModels, currentlyDraggedItem: $currentlyDraggedItem, changedView: $changedView, draggingFinished: $draggingFinished))
-                            
                         }
                         .animation(.default, value: dataSource.listItemViewModels)
-                        .padding(EdgeInsets(top: allowsRowDragToReorder ? 0 : 10, leading: 20, bottom: allowsRowDragToReorder ? 0 : 10, trailing: 20) + rowPadding)
+                        .padding(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 20) + rowPadding)
                         .id(refresh)
                     }
                 }
@@ -267,7 +267,6 @@ public struct Listy<DataSource: ListyDataSource>: View {
             .onDrop(of: [UTType.text], delegate: DraggingFailedDelegate<DataSource>(currentlyDraggedItem: $currentlyDraggedItem, changedView: $changedView, draggingFinished: $draggingFinished))
             .offset(y: _title.wrappedValue.isEmpty ? 0 : -8)
         }
-        .lineLimit(1)
     }
     
     private func titleBarMenuItems() -> ForEach<[ListyContextMenuItem], String, AnyView> {
