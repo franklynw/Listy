@@ -17,7 +17,7 @@ public struct Listy<DataSource: ListyDataSource>: View {
     
     @State internal var currentlyDraggedItem: ItemViewModel?
     @State private var changedView = false
-    @State internal var draggingFinished = false
+    @State internal var draggingFinished = true
     
     @State private var titleScale: CGFloat = 0.9
     @State private var barOpacity: Double = 0
@@ -145,7 +145,12 @@ public struct Listy<DataSource: ListyDataSource>: View {
         VStack {
             
             DoIf($draggingFinished) {
-                dataSource.updateWithReorderedItems()
+                if draggingFinished && ListyUpdateCoordinator.shouldForceUpdate {
+                    dataSource.updateWithReorderedItems()
+                    ListyUpdateCoordinator.shouldForceUpdate = false
+                }
+            } else: {
+                ListyUpdateCoordinator.shouldForceUpdate = true
             }
             
             if !title.isEmpty {
@@ -275,6 +280,11 @@ public struct Listy<DataSource: ListyDataSource>: View {
             menuItem.item(itemId: "")
         }
     }
+}
+
+
+fileprivate class ListyUpdateCoordinator {
+    static var shouldForceUpdate = true
 }
 
 

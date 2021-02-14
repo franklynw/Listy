@@ -93,7 +93,7 @@ extension Listy {
         }
         
         swipeDelete = SwipeDelete(itemId: id, offset: translation)
-        draggingFinished = false
+//        draggingFinished = false
         
         if translation + initialSwipeOffset < geometry.size.width * -0.95 {
             swipeCommitted = true
@@ -108,7 +108,7 @@ extension Listy {
         if swipeCommitted {
             
             swipeDelete = SwipeDelete(itemId: id, offset: 0)
-            draggingFinished = true
+//            draggingFinished = true
             swipeCommitted = false
             initialSwipeOffset = 0
             
