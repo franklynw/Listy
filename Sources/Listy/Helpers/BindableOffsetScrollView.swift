@@ -11,16 +11,16 @@ public struct BindableOffsetScrollView<Content>: View where Content: View {
     
     private let axes: Axis.Set
     private let showIndicators: Bool
-    private let content: Content
+    private let content: () -> Content
     
     private let tracker: ScrollViewOffsetTracker
     
     
-    public init(forId id: String, axes: Axis.Set = .vertical, showIndicators: Bool = true, contentOffset: Binding<CGFloat>, @ViewBuilder content: () -> Content) {
+    public init(forId id: String, axes: Axis.Set = .vertical, showIndicators: Bool = true, contentOffset: Binding<CGFloat>, @ViewBuilder content: @escaping () -> Content) {
         
         self.axes = axes
         self.showIndicators = showIndicators
-        self.content = content()
+        self.content = content
         
         tracker = ScrollViewOffsetTracker.tracker(forId: id)
         
@@ -40,7 +40,7 @@ public struct BindableOffsetScrollView<Content>: View where Content: View {
                         calculateOffset(fromOutside: outsideGeometry, toInside: insideGeometry)
                     }
                     
-                    content
+                    content()
                 }
             }
         }
