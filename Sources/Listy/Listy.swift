@@ -82,16 +82,6 @@ public struct Listy<DataSource: ListyDataSource>: View {
         case button(iconName: SystemImageNaming, action: () -> ())
         case menu(menuSections: [MenuSection], iconName: SystemImageNaming)
         
-        public struct MenuSection: Identifiable {
-            
-            public let id = UUID().uuidString
-            let menuItems: [ButtonConfig]
-            
-            public init(_ menuItems: [ButtonConfig]) {
-                self.menuItems = menuItems
-            }
-        }
-        
         func button(_ color: UIColor) -> AnyView {
 
             switch self {
