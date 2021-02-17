@@ -258,10 +258,16 @@ public struct Listy<DataSource: ListyDataSource>: View {
                                         .padding(EdgeInsets(top: 10, leading: 5, bottom: 10, trailing: 5))
                                         .contentShape(Rectangle())
                                         .onDrag {
+                                            
+                                            if draggingFinished {
+                                                UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                                            }
+                                            
                                             draggingFinished = false
                                             withAnimation {
                                                 currentlyDraggedItem = listItemViewModel
                                             }
+                                            
                                             return NSItemProvider(object: listItemViewModel.id as NSString)
                                         }
                                 }
