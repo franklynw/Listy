@@ -43,8 +43,8 @@ public struct Listy<DataSource: ListyDataSource>: View {
     internal var leftBarButtonItem: BarButtonType?
     internal var rightBarButtonItem: BarButtonType?
     internal var itemTapAction: ((String) -> ())?
-    internal var itemContextMenuItems: [ListyContextMenuItem] = []
-    internal var titleBarContextMenuItems: [ListyContextMenuItem] = []
+    internal var itemContextMenuSections: [ListyContextMenuSection] = []
+    internal var titleBarContextMenuSections: [ListyContextMenuSection] = []
     internal var deleteItem: ((String) -> ())?
     
     var scrollViewOffset: Binding<CGFloat> {
@@ -233,7 +233,7 @@ public struct Listy<DataSource: ListyDataSource>: View {
                                 
 //                                GeometryReader { geometry in
                                     
-                                    DataSource.ListyItemType(viewModel: listItemViewModel, itemContextMenuItems: itemContextMenuItems)
+                                    DataSource.ListyItemType(viewModel: listItemViewModel, itemContextMenu: itemContextMenuSections)
                                         .dragged($currentlyDraggedItem)
 //                                        .offset(x: swipeDelete.itemId == listItemViewModel.id ? min(swipeDelete.offset, 0) : 0)
 //                                        .opacity(swipeDeletedId == listItemViewModel.id ? 0 : 1)
@@ -293,10 +293,17 @@ public struct Listy<DataSource: ListyDataSource>: View {
         }
     }
     
-    private func titleBarMenuItems() -> ForEach<[ListyContextMenuItem], String, AnyView> {
+    @ViewBuilder
+    private func titleBarMenuItems() -> some View {
         
-        return ForEach(titleBarContextMenuItems) { menuItem in
-            menuItem.item(itemId: "")
+        ForEach(titleBarContextMenuSections) { menuSection in
+            ForEach(titleBarContextMenuSections) { menuSection in
+                Section {
+                    ForEach(menuSection.menuItems("")) { menuItem in
+                        menuItem.item(itemId: "")
+                    }
+                }
+            }
         }
     }
 }

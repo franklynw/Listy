@@ -26,10 +26,10 @@ extension Listy {
     }
     
     /// Long-pressing on the title will present a context menu if items are provided here
-    /// - Parameter items: context menu items to present
-    public func titleMenuItems(_ items: [ListyContextMenuItem]) -> Self {
+    /// - Parameter sections: context menu sections to present
+    public func titleMenu(_ sections: [ListyContextMenuSection]) -> Self {
         var copy = self
-        copy.titleBarContextMenuItems = items
+        copy.titleBarContextMenuSections = sections
         return copy
     }
     
@@ -82,10 +82,10 @@ extension Listy {
     }
     
     /// Set this to make a context menu appear if the user long-presses on a list item
-    /// - Parameter items: the context menu items
-    public func itemContextMenuItems(_ items: [ListyContextMenuItem]) -> Self {
+    /// - Parameter items: the context menu sections
+    public func itemContextMenu(_ sections: [ListyContextMenuSection]) -> Self {
         var copy = self
-        copy.itemContextMenuItems = items
+        copy.itemContextMenuSections = sections
         return copy
     }
     

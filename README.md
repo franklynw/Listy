@@ -24,8 +24,8 @@ var body: some View {
         Listy(viewModel)
             .title(viewModel.title, color: viewModel.titleColor)
             .titleBarColor(viewModel.titleBarColor)
-            .titleMenuItems(viewModel.titleBarContextMenuItems)
-            .leftBarItem(.menu(menuItems: viewModel.leftBarItemContextMenuItems, iconName: Image.SystemName.ellipsis))
+            .titleMenu(viewModel.titleBarContextMenuSections)
+            .leftBarItem(.menu(menuSections: viewModel.leftBarItemContextMenuSections, iconName: Image.SystemName.ellipsis))
             .rightBarItem(.button(iconName: Image.SystemName.plus, action: viewModel.addItem))
             .allowsRowDragToReorder(viewModel.canReorderRows)
             .onTapped(viewModel.completeItem)
@@ -77,7 +77,7 @@ If you provide a title, you can also give it a context menu. If no title is prov
 ```swift
 Listy(viewModel)
     .title(viewModel.title, color: viewModel.titleColor) // the title is needed or it's a no-op
-    .titleMenuItems(viewModel.titleBarContextMenuItems)
+    .titleMenu(viewModel.titleBarContextMenuSections)
 ```
 
 ### Left and right "barButtonItems"
@@ -87,7 +87,7 @@ If you provide a title, you can also have left & right bar buttons. If no title 
 ```swift
 Listy(viewModel)
     .title(viewModel.title, color: viewModel.titleColor) // the title is needed or it's a no-op
-    .leftBarItem(.menu(menuItems: viewModel.leftBarItemContextMenuItems, iconName: Image.SystemName.ellipsis))
+    .leftBarItem(.menu(menuSections: viewModel.leftBarItemContextMenuSections, iconName: Image.SystemName.ellipsis))
     .rightBarItem(.button(iconName: Image.SystemName.plus, action: viewModel.addItem))
 ```
 
@@ -139,7 +139,7 @@ Provide context menus for items in the list
 
 ```swift
 Listy(viewModel)
-    .itemContextMenuItems(viewModel.itemContextMenuItems)
+    .itemContextMenu(viewModel.itemContextMenuSections)
 ```
 
 ### List insets
@@ -201,7 +201,7 @@ public init(title: String, systemImage: String? = nil, shouldAppear: ((String) -
 ### Initialise as a "sub-menu" row
 
 ```swift
-public init(title: String, systemImage: String? = nil, shouldAppear: ((String) -> Bool)? = nil, subMenuItems: @escaping (String) -> [ListyContextMenuItem])
+public init(title: String, systemImage: String? = nil, shouldAppear: ((String) -> Bool)? = nil, menuSections: @escaping (String) -> [ListyContextMenuSection])
 ```
 
 * title - the menu item's title
