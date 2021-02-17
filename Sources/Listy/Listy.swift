@@ -7,6 +7,7 @@
 import SwiftUI
 import UniformTypeIdentifiers
 import FWCommonProtocols
+import ButtonConfig
 
 
 public struct Listy<DataSource: ListyDataSource>: View {
@@ -75,9 +76,11 @@ public struct Listy<DataSource: ListyDataSource>: View {
     private let mainTitleDisappearedDistance: CGFloat = 26
     private let smallTitleFadeSpeed: CGFloat = 4
     
+    private let id: String
+    
     public enum BarButtonType {
         case button(iconName: SystemImageNaming, action: () -> ())
-        case menu(menuItems: [ListyContextMenuItem], iconName: SystemImageNaming)
+        case menu(menuItems: [ButtonConfig], iconName: SystemImageNaming)
         
         func button(_ color: UIColor) -> AnyView {
 
@@ -101,7 +104,7 @@ public struct Listy<DataSource: ListyDataSource>: View {
                 
                 let menu = Menu {
                     ForEach(menuItems) { menuItem in
-                        menuItem.item(itemId: "")
+                        menuItem.item()
                     }
                 } label: {
                     Image(systemName: iconName.systemImageName)
@@ -131,6 +134,7 @@ public struct Listy<DataSource: ListyDataSource>: View {
     
     
     public init(_ viewModel: DataSource) {
+        
         _dataSource = StateObject(wrappedValue: viewModel)
         _refresh = Binding<Bool>(get: { false }, set: { _ in })
         _allowsRowDragToReorder = Binding<Bool>(get: { false }, set: { _ in })
@@ -138,6 +142,8 @@ public struct Listy<DataSource: ListyDataSource>: View {
         _title = Binding<String>(get: { "" }, set: { _ in })
         _titleColor = Binding<UIColor>(get: { .label }, set: { _ in })
         _contentOffset = Binding<CGFloat>(get: { 0 }, set: { _ in })
+        
+        id = viewModel.id
     }
     
     public var body: some View {
@@ -198,7 +204,7 @@ public struct Listy<DataSource: ListyDataSource>: View {
                 }
             }
             
-            TrackableScrollView(Axis.Set.vertical, showIndicators: true, contentOffset: scrollViewOffset) {
+            BindableOffsetScrollView(forId: dataSource.id, axes: Axis.Set.vertical, showIndicators: true, contentOffset: scrollViewOffset) {
                 
                 VStack {
                     
@@ -225,14 +231,14 @@ public struct Listy<DataSource: ListyDataSource>: View {
                                     
                                     DataSource.ListyItemType(viewModel: listItemViewModel, itemContextMenuItems: itemContextMenuItems)
                                         .dragged($currentlyDraggedItem)
-                                        .offset(x: swipeDelete.itemId == listItemViewModel.id ? min(swipeDelete.offset, 0) : 0)
-                                        .opacity(swipeDeletedId == listItemViewModel.id ? 0 : 1)
+//                                        .offset(x: swipeDelete.itemId == listItemViewModel.id ? min(swipeDelete.offset, 0) : 0)
+//                                        .opacity(swipeDeletedId == listItemViewModel.id ? 0 : 1)
                                         .onTapGesture {
                                             if initialSwipeOffset == 0 {
                                                 itemTapAction?(listItemViewModel.id)
                                             }
                                             currentlyDraggedItem = nil
-                                            swipeDidEnd()
+//                                            swipeDidEnd()
                                         }
 //                                        .gesture(swipeToDeleteGesture(with: geometry, forItemWithId: listItemViewModel.id))
                                     
@@ -271,6 +277,9 @@ public struct Listy<DataSource: ListyDataSource>: View {
             }
             .onDrop(of: [UTType.text], delegate: DraggingFailedDelegate<DataSource>(currentlyDraggedItem: $currentlyDraggedItem, changedView: $changedView, draggingFinished: $draggingFinished))
             .offset(y: _title.wrappedValue.isEmpty ? 0 : -8)
+        }
+        .onDisappear {
+            ScrollViewOffsetTracker.removeTracker(forId: id)
         }
     }
     

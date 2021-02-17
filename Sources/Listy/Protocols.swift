@@ -8,7 +8,7 @@
 import SwiftUI
 
 
-public protocol ListyDataSource: ObservableObject {
+public protocol ListyDataSource: ObservableObject, Identifiable where ID == String {
     associatedtype ListyItemType: ListyIdentifiableView
     var listItemViewModels: [ListyItemType.ViewModelType] { get set }
     func updateWithReorderedItems()

@@ -214,6 +214,7 @@ public init(title: String, systemImage: String? = nil, shouldAppear: ((String) -
 
 Requires -
 
+* ButtonConfig, which is linked. GitHub page is [here](https://github.com/franklynw/ButtonConfig)
 * FWCommonProtocols, which is linked. GitHub page is [here](https://github.com/franklynw/FWCommonProtocols)
 
 Included in the code is SwiftUITrackableScrollView - it's not included as a dependency as Swift Package Manager couldn't resolve an unversioned packed with Listy, which is versioned. In any case, take a look at it [here](https://github.com/maxnatchanon/trackable-scroll-view) as there's some clever stuff there.
