@@ -80,7 +80,17 @@ public struct Listy<DataSource: ListyDataSource>: View {
     
     public enum BarButtonType {
         case button(iconName: SystemImageNaming, action: () -> ())
-        case menu(menuItems: [ButtonConfig], iconName: SystemImageNaming)
+        case menu(menuSections: [MenuSection], iconName: SystemImageNaming)
+        
+        public struct MenuSection: Identifiable {
+            
+            public let id = UUID().uuidString
+            let menuItems: [ButtonConfig]
+            
+            public init(_ menuItems: [ButtonConfig]) {
+                self.menuItems = menuItems
+            }
+        }
         
         func button(_ color: UIColor) -> AnyView {
 
@@ -100,11 +110,15 @@ public struct Listy<DataSource: ListyDataSource>: View {
                 
                 return AnyView(button)
 
-            case .menu(let menuItems, let iconName):
+            case .menu(let menuSections, let iconName):
                 
                 let menu = Menu {
-                    ForEach(menuItems) { menuItem in
-                        menuItem.item()
+                    ForEach(menuSections) { menuSection in
+                        Section {
+                            ForEach(menuSection.menuItems) { menuItem in
+                                menuItem.item()
+                            }
+                        }
                     }
                 } label: {
                     Image(systemName: iconName.systemImageName)
