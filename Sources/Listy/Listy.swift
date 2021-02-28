@@ -8,6 +8,7 @@ import SwiftUI
 import UniformTypeIdentifiers
 import FWCommonProtocols
 import ButtonConfig
+import BindableOffsetScrollView
 
 
 public struct Listy<DataSource: ListyDataSource>: View {
@@ -47,21 +48,21 @@ public struct Listy<DataSource: ListyDataSource>: View {
     internal var titleBarContextMenuSections: [ListyContextMenuSection] = []
     internal var deleteItem: ((String) -> ())?
     
-    var scrollViewOffset: Binding<CGFloat> {
-        Binding<CGFloat>(
+    var scrollViewInfo: Binding<ScrollViewInfo> {
+        Binding<ScrollViewInfo>(
             get: {
-                return 0
+                return ScrollViewInfo(offset: 0, size: .zero)
             },
             set: {
                 
-                contentOffset = $0
+                contentOffset = $0.offset
                 
-                let scale = min(max(minTitleScale, -$0 / titleScaleMultiplier + minTitleScale), 1)
+                let scale = min(max(minTitleScale, -contentOffset / titleScaleMultiplier + minTitleScale), 1)
                 titleScale = scale
                 
-                let opacity = min(max($0 / mainTitleDisappearedDistance, 0), 1)
+                let opacity = min(max(contentOffset / mainTitleDisappearedDistance, 0), 1)
                 barOpacity = Double(opacity)
-                smallTitleOpacity = $0 >= mainTitleDisappearedDistance ? 1 : 0
+                smallTitleOpacity = contentOffset >= mainTitleDisappearedDistance ? 1 : 0
                 largeTitleOpacity = 1 - smallTitleOpacity
                 
                 swipeDidEnd()
@@ -95,7 +96,7 @@ public struct Listy<DataSource: ListyDataSource>: View {
                         .frame(width: 22, height: 22)
                         .font(Font.title3.weight(.light))
                         .accentColor(Color(color))
-                        .padding(EdgeInsets(top: 12, leading: 8, bottom: 12, trailing: 8))
+                        .padding(EdgeInsets(top: 0, leading: 8, bottom: 0, trailing: 8))
                 }
                 
                 return AnyView(button)
@@ -116,7 +117,7 @@ public struct Listy<DataSource: ListyDataSource>: View {
                         .frame(width: 22, height: 22)
                         .font(Font.title3.weight(.light))
                         .accentColor(Color(color))
-                        .padding(EdgeInsets(top: 12, leading: 8, bottom: 12, trailing: 8))
+                        .padding(EdgeInsets(top: 0, leading: 8, bottom: 0, trailing: 8))
                 }
 
                 return AnyView(menu)
@@ -176,7 +177,7 @@ public struct Listy<DataSource: ListyDataSource>: View {
                                 .foregroundColor(Color(titleBarColor))
                         )
                     
-                    HStack {
+                    HStack(alignment: .center) {
                         
                         if let leftBarButtonItem = leftBarButtonItem {
                             leftBarButtonItem.button(titleColor)
@@ -208,7 +209,7 @@ public struct Listy<DataSource: ListyDataSource>: View {
                 }
             }
             
-            BindableOffsetScrollView(forId: dataSource.id, axes: Axis.Set.vertical, showIndicators: true, contentOffset: scrollViewOffset) {
+            BindableOffsetScrollView(forId: dataSource.id, axes: Axis.Set.vertical, showIndicators: true, contentInfo: scrollViewInfo) { _ in
                 
                 VStack {
                     
