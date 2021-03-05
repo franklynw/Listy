@@ -15,12 +15,14 @@ let package = Package(
             targets: ["Listy"]),
     ],
     dependencies: [
-        .package(name: "FWCommonProtocols", url: "https://github.com/franklynw/FWCommonProtocols.git", .upToNextMajor(from: "1.0.0"))
+        .package(name: "BindableOffsetScrollView", url: "https://github.com/franklynw/BindableOffsetScrollView.git", .upToNextMajor(from: "1.0.0")),
+        .package(name: "FWCommonProtocols", url: "https://github.com/franklynw/FWCommonProtocols.git", .upToNextMajor(from: "1.0.0")),
+        .package(name: "ButtonConfig", url: "https://github.com/franklynw/ButtonConfig.git", .upToNextMajor(from: "1.0.0"))
     ],
     targets: [
         .target(
             name: "Listy",
-            dependencies: ["FWCommonProtocols"],
+            dependencies: ["BindableOffsetScrollView", "FWCommonProtocols", "ButtonConfig"],
             resources: [.process("Resources")]),
         .testTarget(
             name: "ListyTests",

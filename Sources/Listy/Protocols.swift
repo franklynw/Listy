@@ -8,7 +8,7 @@
 import SwiftUI
 
 
-public protocol ListyDataSource: ObservableObject {
+public protocol ListyDataSource: ObservableObject, Identifiable where ID == String {
     associatedtype ListyItemType: ListyIdentifiableView
     var listItemViewModels: [ListyItemType.ViewModelType] { get set }
     func updateWithReorderedItems()
@@ -18,6 +18,6 @@ public protocol ListyItemViewModel: ObservableObject, Equatable, Identifiable wh
 
 public protocol ListyIdentifiableView: View, Hashable, Identifiable {
     associatedtype ViewModelType: ListyItemViewModel
-    init(viewModel: ViewModelType, itemContextMenuItems: [ListyContextMenuItem])
+    init(viewModel: ViewModelType, itemContextMenu: [ListyContextMenuSection])
     func dragged(_ currentlyDraggedItem: Binding<ViewModelType?>) -> Self
 }

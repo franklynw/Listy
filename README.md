@@ -24,8 +24,8 @@ var body: some View {
         Listy(viewModel)
             .title(viewModel.title, color: viewModel.titleColor)
             .titleBarColor(viewModel.titleBarColor)
-            .titleMenuItems(viewModel.titleBarContextMenuItems)
-            .leftBarItem(.menu(menuItems: viewModel.leftBarItemContextMenuItems, iconName: Image.SystemName.ellipsis))
+            .titleMenu(viewModel.titleBarContextMenuSections)
+            .leftBarItem(.menu(menuSections: viewModel.leftBarItemContextMenuSections, iconName: Image.SystemName.ellipsis))
             .rightBarItem(.button(iconName: Image.SystemName.plus, action: viewModel.addItem))
             .allowsRowDragToReorder(viewModel.canReorderRows)
             .onTapped(viewModel.completeItem)
@@ -77,7 +77,7 @@ If you provide a title, you can also give it a context menu. If no title is prov
 ```swift
 Listy(viewModel)
     .title(viewModel.title, color: viewModel.titleColor) // the title is needed or it's a no-op
-    .titleMenuItems(viewModel.titleBarContextMenuItems)
+    .titleMenu(viewModel.titleBarContextMenuSections)
 ```
 
 ### Left and right "barButtonItems"
@@ -87,7 +87,7 @@ If you provide a title, you can also have left & right bar buttons. If no title 
 ```swift
 Listy(viewModel)
     .title(viewModel.title, color: viewModel.titleColor) // the title is needed or it's a no-op
-    .leftBarItem(.menu(menuItems: viewModel.leftBarItemContextMenuItems, iconName: Image.SystemName.ellipsis))
+    .leftBarItem(.menu(menuSections: viewModel.leftBarItemContextMenuSections, iconName: Image.SystemName.ellipsis))
     .rightBarItem(.button(iconName: Image.SystemName.plus, action: viewModel.addItem))
 ```
 
@@ -139,7 +139,39 @@ Provide context menus for items in the list
 
 ```swift
 Listy(viewModel)
-    .itemContextMenuItems(viewModel.itemContextMenuItems)
+    .itemContextMenu(viewModel.itemContextMenuSections)
+```
+
+### List insets
+
+Add insets around the list
+
+```swift
+Listy(viewModel)
+    .contentInsets(EdgeInsets(top: 0, leading: 10, bottom: 30, trailing: 10))
+```
+
+### Row padding
+
+Add padding around the list rows
+
+```swift
+Listy(viewModel)
+    .rowPadding(EdgeInsets(top: 5, leading: 0, bottom: 5, trailing: 0))
+```
+
+### Observe the (vertical) content offset
+
+If you need to react to the list's vertical content offset -
+
+```swift
+@State var offset: CGFloat = 0
+```
+then -
+
+```swift
+Listy(viewModel)
+    .observeContentOffset($offset)
 ```
 
 ### Force list refresh
@@ -169,7 +201,7 @@ public init(title: String, systemImage: String? = nil, shouldAppear: ((String) -
 ### Initialise as a "sub-menu" row
 
 ```swift
-public init(title: String, systemImage: String? = nil, shouldAppear: ((String) -> Bool)? = nil, subMenuItems: @escaping (String) -> [ListyContextMenuItem])
+public init(title: String, systemImage: String? = nil, shouldAppear: ((String) -> Bool)? = nil, menuSections: @escaping (String) -> [ListyContextMenuSection])
 ```
 
 * title - the menu item's title
@@ -182,6 +214,7 @@ public init(title: String, systemImage: String? = nil, shouldAppear: ((String) -
 
 Requires -
 
+* ButtonConfig, which is linked. GitHub page is [here](https://github.com/franklynw/ButtonConfig)
 * FWCommonProtocols, which is linked. GitHub page is [here](https://github.com/franklynw/FWCommonProtocols)
 
 Included in the code is SwiftUITrackableScrollView - it's not included as a dependency as Swift Package Manager couldn't resolve an unversioned packed with Listy, which is versioned. In any case, take a look at it [here](https://github.com/maxnatchanon/trackable-scroll-view) as there's some clever stuff there.

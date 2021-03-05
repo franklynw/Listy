@@ -39,6 +39,8 @@ extension Listy {
             let moveTo = to > from ? to + 1 : to
             
             viewModels.move(fromOffsets: IndexSet(integer: from), toOffset: moveTo)
+            
+            UIImpactFeedbackGenerator(style: .light).impactOccurred()
         }
 
         func dropUpdated(info: DropInfo) -> DropProposal? {

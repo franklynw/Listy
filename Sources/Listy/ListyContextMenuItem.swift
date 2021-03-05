@@ -8,6 +8,15 @@ import SwiftUI
 import FWCommonProtocols
 
 
+public struct ListyContextMenuSection: Identifiable {
+    public let id = UUID().uuidString
+    public let menuItems: (String) -> [ListyContextMenuItem]
+    
+    public init(_ menuItems: @escaping (String) -> [ListyContextMenuItem]) {
+        self.menuItems = menuItems
+    }
+}
+
 public struct ListyContextMenuItem: Identifiable {
     
     public let id: String
@@ -20,7 +29,7 @@ public struct ListyContextMenuItem: Identifiable {
     
     enum MenuItemType: Equatable {
         case button
-        case menu(subMenuItems: (String) -> [ListyContextMenuItem])
+        case menu(menuSections: [ListyContextMenuSection])
         
         static func == (lhs: MenuItemType, rhs: MenuItemType) -> Bool {
             switch (lhs, rhs) {
@@ -44,12 +53,12 @@ public struct ListyContextMenuItem: Identifiable {
             return false
         }
         
-        func subMenuItems(parentId: String) -> [ListyContextMenuItem] {
+        func menuSections() -> [ListyContextMenuSection] {
             switch self {
             case .button:
                 return []
-            case .menu(let subMenuItems):
-                return subMenuItems(parentId)
+            case .menu(let menuSections):
+                return menuSections
             }
         }
     }
@@ -78,9 +87,9 @@ public struct ListyContextMenuItem: Identifiable {
     ///   - shouldAppear: a closure to control whether or not the menu item should appear
     ///   - subMenuItems: the sub-menu items which will apeear when this item is selected
     /// - Returns: a ListyContextMenuItem instance
-    public init(title: String, systemImage: SystemImageNaming? = nil, shouldAppear: ((String) -> Bool)? = nil, subMenuItems: @escaping (String) -> [ListyContextMenuItem]) {
+    public init(title: String, systemImage: SystemImageNaming? = nil, shouldAppear: ((String) -> Bool)? = nil, menuSections: [ListyContextMenuSection]) {
         id = UUID().uuidString
-        itemType = .menu(subMenuItems: subMenuItems)
+        itemType = .menu(menuSections: menuSections)
         self.title = title
         self.iconName = systemImage
         self.shouldAppear = shouldAppear ?? { _ in return true }
@@ -109,11 +118,13 @@ public struct ListyContextMenuItem: Identifiable {
                 
                 return AnyView(button)
                 
-            case .menu(let subMenuItems):
+            case .menu(let menuSections):
                 
                 let menu = Menu {
-                    ForEach(subMenuItems(itemId)) { menuItem in
-                        menuItem.item(itemId: itemId)
+                    ForEach(menuSections) { menuSection in
+                        ForEach(menuSection.menuItems(itemId)) { menuItem in
+                            menuItem.item(itemId: itemId)
+                        }
                     }
                 } label: {
                     Label(self.title, systemImage: iconName?.systemImageName ?? "chevron.right")
