@@ -18,13 +18,8 @@ public struct Listy<DataSource: ListyDataSource>: View {
     @StateObject private var dataSource: DataSource
     
     @State internal var currentlyDraggedItem: ItemViewModel?
-    @State private var changedView = false
     @State internal var draggingFinished = true
     
-    @State private var titleScale: CGFloat = 0.9
-    @State private var barOpacity: Double = 0
-    @State private var smallTitleOpacity: Double = 0
-    @State private var largeTitleOpacity: Double = 1
     @State internal var swipeDelete = SwipeDelete(itemId: "", offset: 0)
     @State internal var swipeDeletedId: String?
     @State internal var swipeCommitted = false
@@ -37,7 +32,18 @@ public struct Listy<DataSource: ListyDataSource>: View {
     @Binding private var titleBarColor: UIColor
     @Binding private var title: String
     @Binding private var titleColor: UIColor
-    @Binding private var contentOffset: CGFloat
+    @Binding private var boundOffset: CGFloat
+    
+    @State private var titleScale: CGFloat = 0.9
+    @State private var barOpacity: Double = 0
+    @State private var smallTitleOpacity: Double = 0
+    @State private var largeTitleOpacity: Double = 1
+    @State private var changedView = false
+    @State private var contentOffset: CGFloat = 0 {
+        didSet {
+            boundOffset = contentOffset
+        }
+    }
     
     internal var contentInsets = EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0)
     internal var rowPadding = EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0)
@@ -56,15 +62,15 @@ public struct Listy<DataSource: ListyDataSource>: View {
             set: {
                 
                 contentOffset = $0.offset
-                
+
                 let scale = min(max(minTitleScale, -contentOffset / titleScaleMultiplier + minTitleScale), 1)
                 titleScale = scale
-                
+
                 let opacity = min(max(contentOffset / mainTitleDisappearedDistance, 0), 1)
                 barOpacity = Double(opacity)
                 smallTitleOpacity = contentOffset >= mainTitleDisappearedDistance ? 1 : 0
                 largeTitleOpacity = 1 - smallTitleOpacity
-                
+
                 swipeDidEnd()
             }
         )
@@ -146,7 +152,7 @@ public struct Listy<DataSource: ListyDataSource>: View {
         _titleBarColor = Binding<UIColor>(get: { .clear }, set: { _ in })
         _title = Binding<String>(get: { "" }, set: { _ in })
         _titleColor = Binding<UIColor>(get: { .label }, set: { _ in })
-        _contentOffset = Binding<CGFloat>(get: { 0 }, set: { _ in })
+        _boundOffset = Binding<CGFloat>(get: { 0 }, set: { _ in })
         
         id = viewModel.id
     }
@@ -349,7 +355,7 @@ extension Listy {
     
     internal func setContentOffset(_ contentOffset: Binding<CGFloat>) -> Self {
         var copy = self
-        copy._contentOffset = contentOffset
+        copy._boundOffset = contentOffset
         return copy
     }
 }

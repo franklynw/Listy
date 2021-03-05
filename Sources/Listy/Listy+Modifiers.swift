@@ -107,7 +107,7 @@ extension Listy {
     
     /// Provides the vertical content offset of the scrollView
     /// - Parameter contentOffset: a binding to a CGFloat var
-    public func observeContentOffset(_ contentOffset: Binding<CGFloat>) -> Self {
+    public func contentOffset(_ contentOffset: Binding<CGFloat>) -> Self {
         return setContentOffset(contentOffset)
     }
     
